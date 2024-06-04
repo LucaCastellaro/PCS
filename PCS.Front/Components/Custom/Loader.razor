@@ -1,0 +1,14 @@
+﻿@if (IsLoading)
+{
+    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+}
+else if (ChildContent is not null)
+{
+    @ChildContent
+}
+@code {
+    [Parameter]
+    public required bool IsLoading { get; set; }
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

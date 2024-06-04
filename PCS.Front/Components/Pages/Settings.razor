@@ -1,0 +1,26 @@
+﻿@page "/settings";
+
+@using PCS.Auth.Services
+
+@inject IUserManager userManager;
+@inject NavigationManager navigationManager;
+
+<button class="btn btn-outline-danger" @onclick="OnLogout" disabled="@isLoading">
+    <PCS.Front.Components.Custom.Loader IsLoading=@isLoading>
+        Logout
+    </PCS.Front.Components.Custom.Loader>
+</button>
+
+@code {
+    private bool isLoading = false;
+    private async Task OnLogout()
+    {
+        if (!await userManager.IsLogged()) return;
+
+        isLoading = true;
+        await userManager.Logout();
+        isLoading = false;
+
+        navigationManager.NavigateTo("", true, false);
+    }
+}

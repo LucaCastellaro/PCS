@@ -1,0 +1,66 @@
+﻿@using PCS.Auth.Services
+@using PCS.Front.Shared.Services
+
+@inject IUserManager userManager;
+@inject IDialogService dialogService;
+@inject NavigationManager navigationManager
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">🚗 PCS</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        @foreach (var item in menuItems)
+        {
+            <PCS.Front.Components.Custom.MenuItem Item=@item />
+        }
+    </nav>
+</div>
+
+@code {
+    public bool isLoading = false;
+
+    private Shared.Models.MenuItem[] menuItems = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!await userManager.IsLogged())
+        {
+            navigationManager.NavigateTo("", false, false);
+            return;
+        }
+
+        isLoading = true;
+
+        menuItems = [
+            new Shared.Models.MenuItem {
+                    Icon = "bi bi-house-door-fill-nav-menu",
+                    Label = "Dashboard",
+                    Ref = "dashboard"
+                },
+        new Shared.Models.MenuItem {
+                    Icon = "bi bi-plus-square-fill-nav-menu",
+                    Label = "Counter",
+                    Ref = "counter"
+                },
+        new Shared.Models.MenuItem {
+                    Icon = "bi bi-list-nested-nav-menu",
+                    Label = "Weather",
+                    Ref = "weather"
+                },
+        new Shared.Models.MenuItem {
+                    Icon = "bi bi-list-gear-nav-menu",
+                    Label = "Settings",
+                    Ref = "settings"
+                }
+        ];
+        isLoading = false;
+
+        await base.OnInitializedAsync();
+    }
+}
