@@ -1,0 +1,17 @@
+﻿@page "/garage"
+
+@using PCS.Front.Shared.Services
+
+@inject IDialogService dialogService
+
+<h1>Garage works!</h1>
+
+<button>
+    <i class="bi bi-pencil"></i>
+</button>
+@code {
+    public async Task MyCallback()
+    {
+        await dialogService.Alert("Titolo", "Messaggio", "OK");
+    }
+}

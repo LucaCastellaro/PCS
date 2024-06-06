@@ -2,6 +2,7 @@
 
 @using PCS.Auth.Services
 @using PCS.Front.Shared.Services
+@using PCS.Front.Components.Custom
 
 @inject IUserManager userManager;
 @inject IDialogService dialogService;
@@ -12,9 +13,9 @@
         <h1>🚗 PCS</h1>
         <h3 class="text-muted mb-3">Performance Control System</h3>
         <button class="btn btn-primary" @onclick="OnLogin" disabled="@isLoading">
-            <PCS.Front.Components.Custom.Loader IsLoading=@isLoading>
+            <Loader IsLoading=@isLoading>
                 <span>&nbsp;Login</span>
-            </PCS.Front.Components.Custom.Loader>
+            </Loader>
         </button>
     </div>
 </div>
@@ -28,7 +29,7 @@
     {
         if (await userManager.IsLogged())
         {
-            navigationManager.NavigateTo("Dashboard", false, false);
+            navigationManager.NavigateTo("garage", false, false);
             return;
         }
 
@@ -41,14 +42,14 @@
         {
             if (await userManager.IsLogged())
             {
-                navigationManager.NavigateTo("Dashboard", true, false);
+                navigationManager.NavigateTo("garage", true, false);
                 return;
             }
 
             isLoading = true;
             var user = await userManager.Login();
             isLoading = false;
-            if (user is not null) navigationManager.NavigateTo("Dashboard", true, false);
+            if (user is not null) navigationManager.NavigateTo("garage", true, false);
         }
         catch (Exception ex)
         {

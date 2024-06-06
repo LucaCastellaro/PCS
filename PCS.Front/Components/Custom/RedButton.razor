@@ -1,0 +1,19 @@
+﻿<button class="red-button shadow-sm w-100 border border-0 text-uppercase text-white py-2 rounded-pill" @onclick=OnClick disabled=@IsDisabled>
+    @ChildContent
+</button>
+
+@code {
+    [Parameter]
+    public bool IsDisabled { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnCallback { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    public async Task OnClick()
+    {
+        await OnCallback.InvokeAsync(true);    
+    }
+}

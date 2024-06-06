@@ -22,10 +22,10 @@
         <Nullable>enable</Nullable>
 
         <!-- Display name -->
-        <ApplicationTitle>PCS.Front</ApplicationTitle>
+        <ApplicationTitle>PCS</ApplicationTitle>
 
         <!-- App Identifier -->
-        <ApplicationId>com.companyname.pcs.front</ApplicationId>
+        <ApplicationId>com.lucacastellaro.pcs</ApplicationId>
 
         <!-- Versions -->
         <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -58,6 +58,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Content Remove="Components\Custom\RedButton.razor" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.40" />
         <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.40" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="8.0.40" />
@@ -66,6 +70,18 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Back\Core\PCS.Auth\PCS.Auth.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <UpToDateCheckInput Remove="Components\Custom\RedButton.razor" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Components\Custom\RedButton.razor" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Components\Custom\RedButton.razor" />
     </ItemGroup>
 
 </Project>

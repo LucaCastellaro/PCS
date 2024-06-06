@@ -2,26 +2,14 @@
 @using PCS.Front.Shared.Services
 
 @inject IUserManager userManager;
-@inject IDialogService dialogService;
 @inject NavigationManager navigationManager
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">🚗 PCS</a>
-    </div>
+<div class="nav-bar">
+    @foreach (var item in menuItems)
+    {
+        <PCS.Front.Components.Custom.MenuItem Item=@item />
+    }
 </div>
-
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        @foreach (var item in menuItems)
-        {
-            <PCS.Front.Components.Custom.MenuItem Item=@item />
-        }
-    </nav>
-</div>
-
 @code {
     public bool isLoading = false;
 
@@ -38,25 +26,20 @@
         isLoading = true;
 
         menuItems = [
+                new Shared.Models.MenuItem {
+                    Icon = "bi bi-person-fill",
+                    Label = "Profilo",
+                    Ref = "profile"
+                },
             new Shared.Models.MenuItem {
-                    Icon = "bi bi-house-door-fill-nav-menu",
-                    Label = "Dashboard",
-                    Ref = "dashboard"
+                    Icon = "bi bi-car-front-fill",
+                    Label = "Garage",
+                    Ref = "garage"
                 },
-        new Shared.Models.MenuItem {
-                    Icon = "bi bi-plus-square-fill-nav-menu",
-                    Label = "Counter",
-                    Ref = "counter"
-                },
-        new Shared.Models.MenuItem {
-                    Icon = "bi bi-list-nested-nav-menu",
-                    Label = "Weather",
-                    Ref = "weather"
-                },
-        new Shared.Models.MenuItem {
-                    Icon = "bi bi-list-gear-nav-menu",
-                    Label = "Settings",
-                    Ref = "settings"
+            new Shared.Models.MenuItem {
+                    Icon = "bi bi-file-earmark-text-fill",
+                    Label = "Dati personali",
+                    Ref = "personal-data"
                 }
         ];
         isLoading = false;

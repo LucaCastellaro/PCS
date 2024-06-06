@@ -1,17 +1,17 @@
-﻿@page "/dashboard"
+﻿@page "/personal-data"
 
 @using PCS.Auth.Services
-@using PCS.Front.Shared.Services
+@using PCS.Front.Components.Custom
 
-@inject IUserManager userManager;
-@inject NavigationManager navigationManager;
+@inject IUserManager userManager
+@inject NavigationManager navigationManager
 
 <div>
-    <PCS.Front.Components.Custom.Loader IsLoading=@isLoading>
+    <Loader IsLoading=@isLoading>
         <h1>Ciao, @userName.</h1>
 
         Welcome to your new app.
-    </PCS.Front.Components.Custom.Loader>
+    </Loader>
 </div>
 
 @code {

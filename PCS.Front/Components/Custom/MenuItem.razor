@@ -1,10 +1,27 @@
-﻿<div class="nav-item px-3">
-    <NavLink class="nav-link" href=@Item.Ref Match="NavLinkMatch.All">
-        <span class=@Item.Icon aria-hidden="true"></span> @Item.Label
-    </NavLink>
+﻿@inject NavigationManager navigationManager;
+
+<div>
+    <div class="nav-item">
+        <NavLink class="text-white" href=@Item.Ref Match="NavLinkMatch.All">
+            <span class=@IconClass />
+        </NavLink>
+    </div>
 </div>
 
 @code {
     [Parameter]
     public required Shared.Models.MenuItem Item { get; set; }
+
+    public bool IsActive() => navigationManager.Uri.Contains(Item.Ref, StringComparison.InvariantCultureIgnoreCase);
+
+    public string? IconClass
+    {
+        get
+        {
+            var value = Item.Icon;
+            if (!IsActive()) return $"{value} px-4 py-2 opacity-75";
+
+            return $"{value} px-4 py-2 bg-white bg-opacity-10 rounded-pill";
+        }
+    }
 }
