@@ -1,5 +1,6 @@
 ﻿@using PCS.Auth.Services
 @using PCS.Front.Shared.Services
+@using PCS.Front.Components.Custom
 
 @inject IUserManager userManager;
 @inject NavigationManager navigationManager
@@ -7,7 +8,7 @@
 <div class="nav-bar">
     @foreach (var item in menuItems)
     {
-        <PCS.Front.Components.Custom.MenuItem Item=@item />
+        <MenuItem Item=@item />
     }
 </div>
 @code {

@@ -1,29 +1,58 @@
 ﻿@page "/profile";
 
+@using PCS.Auth.Extensions
 @using PCS.Auth.Services
 @using PCS.Front.Components.Custom
+@using PCS.Front.Components.Layout
 
 @inject IUserManager userManager
 @inject NavigationManager navigationManager
 
-<RedButton OnCallback=@OnLogout IsDisabled=@isLoading>
+<div class="h-100">
     <Loader IsLoading=@isLoading>
-        Logout
+        @foreach (var prop in userProps)
+        {
+            <div class="mb-4">
+                <Card>
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-bold">@prop.Key</span>
+                        <span>@prop.Value</span>
+                    </div>
+                </Card>
+            </div>
+        }
+        <div class="mb-4">
+            <RedButton OnCallback=@OnLogout IsDisabled=@isLoading>
+                <Loader IsLoading=@isLoading>
+                    Logout
+                </Loader>
+            </RedButton>
+        </div>
     </Loader>
-</RedButton>
+</div>
 
 @code {
-
     private bool isLoading = false;
+    private Dictionary<string, string?> userProps = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        if (!await userManager.IsLogged()) navigationManager.NavigateTo("", true, false);
+
+        userProps.Add("Nome", userManager.Principal!.GetFirstName());
+        userProps.Add("Cognome", userManager.Principal!.GetLastName());
+        isLoading = false;
+    }
 
     private async Task OnLogout()
     {
-        if (!await userManager.IsLogged()) return;
-
-        isLoading = true;
-        await userManager.Logout();
-        isLoading = false;
-
+        if (await userManager.IsLogged())
+        {
+            isLoading = true;
+            await userManager.Logout();
+            isLoading = false;
+        }
         navigationManager.NavigateTo("", true, false);
     }
 }

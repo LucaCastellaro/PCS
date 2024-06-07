@@ -1,14 +1,15 @@
 ﻿@page "/garage"
 
 @using PCS.Front.Shared.Services
+@using PCS.Front.Components.Custom
 
 @inject IDialogService dialogService
 
 <h1>Garage works!</h1>
 
-<button>
+<FAB OnCallback=@MyCallback>
     <i class="bi bi-pencil"></i>
-</button>
+</FAB>
 @code {
     public async Task MyCallback()
     {

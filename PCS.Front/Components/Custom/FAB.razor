@@ -1,0 +1,22 @@
+﻿<button class="FAB z-3 shadow-sm border border-0 text-white py-2 rounded-circle d-flex justify-content-center align-items-center position-fixed" @onclick=OnClick>
+    <div>
+        @ChildContent
+    </div>
+</button>
+
+@code {
+    [Parameter]
+    public bool IsDisabled { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnCallback { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    public async Task OnClick()
+    {
+        await OnCallback.InvokeAsync(true);
+    }
+
+}

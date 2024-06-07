@@ -17,6 +17,8 @@ public interface IUserManager
     Task<string?> GetUserName();
 
     Task<bool> IsLogged();
+
+    ClaimsPrincipal? Principal { get; }
 }
 
 public class UserManager : IUserManager
@@ -24,7 +26,7 @@ public class UserManager : IUserManager
     private readonly IAuth0Client _auth0Client;
     private readonly string _domain;
     private readonly string _clientId;
-    private ClaimsPrincipal? _principal;
+    public ClaimsPrincipal? Principal { get; private set; }
 
     public UserManager(string domain, string clientId, IAuth0Client auth0Client)
     {
@@ -47,26 +49,26 @@ public class UserManager : IUserManager
         await SecureStorage.Default.SetAsync(Constants.SecureStorageKeys.IDENTITY_TOKEN, loginResult.IdentityToken);
         await SecureStorage.Default.SetAsync(Constants.SecureStorageKeys.ACCESS_TOKEN, loginResult.AccessToken);
 
-        _principal = loginResult.User;
+        Principal = loginResult.User;
 
-        return _principal;
+        return Principal;
     }
 
     public async Task Logout()
     {
         if (!await IsLogged()) return;
         await _auth0Client.LogoutAsync();
-        _principal = null;
+        Principal = null;
         SecureStorage.Default.RemoveAll();
     }
 
     public async Task<ClaimsPrincipal?> GetAuthenticatedUser()
     {
-        if (_principal is not null) return _principal;
+        if (Principal is not null) return Principal;
 
         var idToken = await SecureStorage.Default.GetAsync(Constants.SecureStorageKeys.IDENTITY_TOKEN);
 
-        if (idToken is null) return _principal;
+        if (idToken is null) return Principal;
 
         var doc = await new HttpClient().GetDiscoveryDocumentAsync($"https://{_domain}");
         var validator = new JwtHandlerIdentityTokenValidator();
@@ -82,29 +84,27 @@ public class UserManager : IUserManager
 
         var validationResult = await validator.ValidateAsync(idToken, options);
 
-        if (validationResult.IsError) return _principal;
+        if (validationResult.IsError) return Principal;
 
-        _principal = validationResult.User;
-        return _principal;
+        Principal = validationResult.User;
+        return Principal;
     }
 
     public async Task<bool> IsLogged()
     {
-        if (_principal is not null) return true;
+        if (Principal is not null) return true;
 
-        var idToken = await SecureStorage.Default.GetAsync(Constants.SecureStorageKeys.IDENTITY_TOKEN);
-
-        return idToken != null;
+        return await GetAuthenticatedUser() is not null;
     }
 
     public async Task<string?> GetUserName()
     {
-        if (_principal is null)
+        if (Principal is null)
         {
-            _principal = await GetAuthenticatedUser();
-            if (_principal is null) return null;
+            Principal = await GetAuthenticatedUser();
+            if (Principal is null) return null;
         }
-        return _principal.Claims.FirstOrDefault(xx => xx.Type == "given_name")?.Value
-                    ?? _principal.Identity!.Name;
+        return Principal.Claims.FirstOrDefault(xx => xx.Type == "given_name")?.Value
+                    ?? Principal.Identity!.Name;
     }
 }
