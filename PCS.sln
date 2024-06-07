@@ -11,6 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{C273A911-6
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PCS.Auth", "Back\Core\PCS.Auth\PCS.Auth.csproj", "{6B9E6CB5-C406-4A6B-A063-0334EBA3286D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Business", "Business", "{C1B0EF81-C65C-4528-B36F-CD04B4E51EDB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCS.Business.Garage", "Back\Business\PCS.Business.Garage\PCS.Business.Garage.csproj", "{D8117C11-ED1B-4797-A515-A9B0CDDC8459}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,10 @@ Global
 		{6B9E6CB5-C406-4A6B-A063-0334EBA3286D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B9E6CB5-C406-4A6B-A063-0334EBA3286D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B9E6CB5-C406-4A6B-A063-0334EBA3286D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8117C11-ED1B-4797-A515-A9B0CDDC8459}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8117C11-ED1B-4797-A515-A9B0CDDC8459}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8117C11-ED1B-4797-A515-A9B0CDDC8459}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8117C11-ED1B-4797-A515-A9B0CDDC8459}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -34,6 +42,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{C273A911-6ACD-4F85-804D-62A26A893F3E} = {D05CAB60-BBE7-41DA-9D64-73C4FEE60C20}
 		{6B9E6CB5-C406-4A6B-A063-0334EBA3286D} = {C273A911-6ACD-4F85-804D-62A26A893F3E}
+		{C1B0EF81-C65C-4528-B36F-CD04B4E51EDB} = {D05CAB60-BBE7-41DA-9D64-73C4FEE60C20}
+		{D8117C11-ED1B-4797-A515-A9B0CDDC8459} = {C1B0EF81-C65C-4528-B36F-CD04B4E51EDB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1FDAABB5-CBE7-464C-B209-0D19E8D17CA6}
