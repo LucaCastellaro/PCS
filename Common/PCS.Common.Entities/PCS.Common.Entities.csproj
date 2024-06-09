@@ -19,16 +19,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+    <PackageReference Include="CNAS.Repository" Version="0.0.1-dev-9355241244" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\..\..\Common\PCS.Common.Entities\PCS.Common.Entities.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Services\" />
 	</ItemGroup>
 
 </Project>

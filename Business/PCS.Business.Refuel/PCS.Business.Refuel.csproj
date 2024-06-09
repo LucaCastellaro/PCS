@@ -24,11 +24,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\..\Common\PCS.Common.Entities\PCS.Common.Entities.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Services\" />
+	  <ProjectReference Include="..\..\Common\PCS.Common.Entities\PCS.Common.Entities.csproj" />
 	</ItemGroup>
 
 </Project>
