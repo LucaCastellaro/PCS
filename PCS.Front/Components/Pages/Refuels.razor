@@ -1,0 +1,18 @@
+﻿@page "/refuels"
+
+@using PCS.Front.Shared.Services
+@using PCS.Front.Components.Custom
+
+@inject IDialogService dialogService
+
+<h1>Garage works!</h1>
+
+<FAB OnCallback=@MyCallback>
+    <i class="bi bi-pencil"></i>
+</FAB>
+@code {
+    public async Task MyCallback()
+    {
+        await dialogService.Alert("Titolo", "Messaggio", "OK");
+    }
+}

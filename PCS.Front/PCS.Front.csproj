@@ -65,7 +65,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Back\Business\PCS.Business.Garage\PCS.Business.Garage.csproj" />
       <ProjectReference Include="..\Back\Core\PCS.Auth\PCS.Auth.csproj" />
+      <ProjectReference Include="..\Business\PCS.Business.Refuel\PCS.Business.Refuel.csproj" />
     </ItemGroup>
 
 </Project>
