@@ -7,17 +7,18 @@ namespace PCS.Common.Entities.Models.Entities;
 [BsonIgnoreExtraElements]
 public sealed record Vehicle : BaseEntity
 {
+    public required string UserId { get; init; }
     public required string Name { get; init; }
     public required string Plate { get; init; }
     [BsonRepresentation(BsonType.String)] public required FuelType FuelType { get; init; }
-    public required string Photo { get; init; }
-    public required string BuyDate { get; init; }
-    public required string InsertDate { get; init; }
-    public required string TotalKm { get; init; }
-    public required string TotalFuel { get; init; }
-    public required QuickMemorandum[] Memorandums { get; init; }
-    public required AverageValues CurrentAverageValues { get; init; }
-    public required AverageValues PreviousAverageValues { get; init; }
+    public string? Photo { get; init; }
+    public required DateTime BuyDate { get; init; }
+    public required DateTime InsertDate { get; init; }
+    [BsonRepresentation(BsonType.Decimal128)] public required decimal TotalKm { get; init; }
+    [BsonRepresentation(BsonType.Decimal128)] public required decimal TotalFuel { get; init; }
+    public QuickMemorandum[]? Memorandums { get; init; }
+    public AverageValues? CurrentAverageValues { get; init; }
+    public AverageValues? PreviousAverageValues { get; init; }
 }
 
 public sealed record QuickVehicle
@@ -25,7 +26,6 @@ public sealed record QuickVehicle
     public required string Id { get; init; }
     public required string Name { get; init; }
     public required string Plate { get; init; }
-    public required string Photo { get; init; }
 }
 
 public enum FuelType

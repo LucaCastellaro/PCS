@@ -22,7 +22,7 @@
     {
         if (!await userManager.IsLogged())
         {
-            navigationManager.NavigateTo("", false, false);
+            navigationManager.NavigateTo("", true, false);
             return;
         }
 

@@ -12,12 +12,11 @@ public static class ServiceCollectionExtensions
     {
         var types = typeof(ServiceCollectionExtensions).Assembly.GetTypes();
 
-        var interfaces = types
-            .Where(xx => xx.Name.EndsWith("Service") && xx.IsInterface);
+        var interfaces = types.Where(xx => xx.Name.StartsWith("I") && xx.Name.EndsWith("Service") && xx.IsInterface);
 
         foreach (var abstraction in interfaces)
         {
-            var implementation = types.FirstOrDefault(xx => xx.IsAssignableFrom(abstraction) && !xx.IsAbstract && !xx.IsInterface);
+            var implementation = types.FirstOrDefault(xx => xx.Name == abstraction.Name[1..] && xx.IsClass && !xx.IsAbstract);
 
             if (implementation is null) continue;
 

@@ -1,18 +1,59 @@
 ﻿@page "/garage"
 
+@using PCS.Auth.Services
+@using PCS.Business.Garage.Services
+@using PCS.Common.Entities.Models.Entities
 @using PCS.Front.Shared.Services
 @using PCS.Front.Components.Custom
+@using PCS.Auth.Extensions
+@using PCS.Front.Components.Layout
 
 @inject IDialogService dialogService
+@inject IVehicleService vehicleService
+@inject IUserManager userManager
+@inject NavigationManager navigationManager
 
-<h1>Garage works!</h1>
+<h1 class="mb-4">Garage</h1>
+@if (vehicles.Count > 0)
+{
+    @foreach (var item in vehicles)
+    {
+        <div class="mb-3">
+            <Card>
+                <div class="fw-bold" style="font-size: 16px">@item.Name</div>
+                <div style="font-size: 12px">@item.Plate</div>
+            </Card>
+        </div>
+    }
+}
+else
+{
+    <div>
+        <p>Nessun veicolo registrato.</p>
+        <p>Aggiungi un veicolo con il pulsante in basso a destra.</p>
+    </div>
+}
 
 <FAB OnCallback=@MyCallback>
-    <i class="bi bi-pencil"></i>
+    <i class="bi bi-plus"></i>
 </FAB>
 @code {
+    private List<QuickVehicle> vehicles = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await userManager.GetAuthenticatedUser();
+        if (user is null)
+        {
+            navigationManager.NavigateTo("", true, false);
+            return;
+        }
+
+        vehicles = await vehicleService.GetAllVehicles(user.GetUserId()!);
+    }
+
     public async Task MyCallback()
     {
-        await dialogService.Alert("Titolo", "Messaggio", "OK");
+        navigationManager.NavigateTo("/garage/new-vehicle", false, false);
     }
 }

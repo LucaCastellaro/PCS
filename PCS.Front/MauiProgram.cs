@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection.Extensions;
+﻿using CNAS.Repository.Extensions;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using PCS.Auth.Extensions;
+using PCS.Business.Garage.Extensions;
 using PCS.Front.Shared.Services;
 
 namespace PCS.Front;
@@ -19,6 +21,12 @@ public static class MauiProgram
             });
 
         builder.Services.AddMauiBlazorWebView();
+
+        builder.Services
+            .AddMongoDb("mongodb://localhost:27017/PCS")
+            .AddRepositories()
+            .AddGarage()
+            ;
 
         builder.Services.TryAddTransient<IDialogService, DialogService>();
 

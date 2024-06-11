@@ -38,7 +38,11 @@
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
-        if (!await userManager.IsLogged()) navigationManager.NavigateTo("", true, false);
+        if (!await userManager.IsLogged())
+        {
+            navigationManager.NavigateTo("", true, false);
+            return;
+        }
 
         userProps.Add("Nome", userManager.Principal!.GetFirstName());
         userProps.Add("Cognome", userManager.Principal!.GetLastName());

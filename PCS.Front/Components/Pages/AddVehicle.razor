@@ -1,0 +1,104 @@
+﻿@page "/garage/new-vehicle"
+
+@using PCS.Auth.Services
+@using PCS.Common.Entities.Models.Entities
+@using PCS.Front.Components.Layout
+@using PCS.Common.Entities.Models.Dtos
+@using PCS.Business.Garage.Services
+@using PCS.Auth.Extensions
+@using System.Security.Claims
+
+@inject IVehicleService vehicleService
+@inject IUserManager userManager
+@inject NavigationManager navigationManager
+
+<h3>Nuovo veicolo</h3>
+
+<Card>
+    <form>
+        <div class="mb-3">
+            <label for="name" class="form-label">Nome</label>
+            <input type="text" class="form-control text-uppercase" id="name" @bind=name />
+        </div>
+        <div class="mb-3">
+            <label for="plate" class="form-label">Targa</label>
+            <input type="text" class="form-control text-uppercase" id="plate" @bind=plate />
+        </div>
+        <div class="mb-3">
+            <label for="date" class="form-label">Data di acquisto</label>
+            <input type="date" class="form-control" id="date" @bind=buyDate />
+        </div>
+        <div class="mb-3">
+            <label for="totalKm" class="form-label">Km totali</label>
+            <input type="number" class="form-control" id="totalKm" @bind=totalKm />
+        </div>
+        <div class="mb-3">
+            <label for="fuel-type" class="form-label">Alimentazione</label>
+            <select class="form-select" id="fuel-type" @bind=fuelType>
+                @foreach(var item in fuelTypes) {
+                    <option value=@item.Value>@item.Label</option>
+                }
+            </select>
+        </div>
+        <div class="d-flex justify-content-evenly">
+            <button class="rounded-pill py-2 px-3 btn-cancel fw-bold" @onclick=OnCancel>Annulla</button>
+            <button class="rounded-pill py-2 px-3 btn-save fw-bold" @onclick=OnSave>Salva</button>
+        </div>
+    </form>
+</Card>
+
+@code {
+    ClaimsPrincipal? principal;
+
+    List<FuelTypeDto> fuelTypes = [];
+
+    string name = string.Empty;
+    string plate  = string.Empty;
+    DateTime buyDate = DateTime.Now;
+    FuelType fuelType = FuelType.Gasoline;
+    decimal totalKm = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        principal = await userManager.GetAuthenticatedUser();
+        if (principal is null)
+        {
+            navigationManager.NavigateTo("", true, false);
+            return;
+        }
+
+        fuelTypes = vehicleService.GetFuelTypes();
+    }
+
+    private void OnCancel()
+    {
+        if (principal is null)
+        {
+            navigationManager.NavigateTo("", true, false);
+            return;
+        }
+
+        navigationManager.NavigateTo("garage", false, false);
+    }
+
+    private async Task OnSave()
+    {
+        if (principal is null)
+        {
+            navigationManager.NavigateTo("", true, false);
+            return;
+        }
+
+        await vehicleService.UpsertVehicle(new()
+        {
+            UserId = principal.GetUserId()!,
+            Name = name,
+            BuyDate = buyDate,
+            FuelType = fuelType,
+            Plate = plate,
+            TotalKm = totalKm
+            });
+
+        navigationManager.NavigateTo("/garage", true, false);
+    }
+}
