@@ -21,7 +21,7 @@ public interface IRefuelService
     Task<decimal> SumWeightedConsumptions(string vehicleId);
 }
 
-public class RefuelService(IRepository<Entities.Refuel> repo) : IRefuelService
+public sealed class RefuelService(IRepository<Entities.Refuel> repo) : IRefuelService
 {
     public IMongoQueryable<Entities.Refuel> GetAllByVehicle(string vehicleId)
         => repo.FindAllAsQueryable(xx => xx.Vehicle.Id == vehicleId);

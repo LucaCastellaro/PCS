@@ -4,27 +4,24 @@ using MongoDB.Driver.Linq;
 using MongoDB.Driver;
 using PCS.Common.Entities.Models.Dtos;
 using PCS.Business.Garage.Models.DTOs;
-using DnsClient.Internal;
-using Microsoft.Extensions.Logging;
 using PCS.Common.Business.Extensions;
+using Serilog;
 
 namespace PCS.Business.Garage.Services;
 
 public interface IVehicleService
 {
-    Task<List<QuickVehicle>> GetAllVehicles(string userId, CancellationToken ct = default);
+    Task<ResponseDto<List<QuickVehicle>>> GetAllVehicles(string userId, CancellationToken ct = default);
     List<FuelTypeDto> GetFuelTypes();
     Task<ResponseDto<Vehicle>> UpsertVehicle(UpsertVehicleDto model);
-    Task<Vehicle?> FindByPlate(string plate, string userId);
+    Task<ResponseDto<Vehicle>> FindByPlate(string plate, string userId);
 }
 
-public class VehicleService(IRepository<Vehicle> repo,
-    ILogger<VehicleService> logger
-    ) : IVehicleService
+public sealed class VehicleService(IRepository<Vehicle> repo) : IVehicleService
 {
-    public async Task<List<QuickVehicle>> GetAllVehicles(string userId, CancellationToken ct = default)
+    public async Task<ResponseDto<List<QuickVehicle>>> GetAllVehicles(string userId, CancellationToken ct = default)
     {
-        return await repo.FindAllAsQueryable(xx => xx.UserId == userId)
+        var vehicles = await repo.FindAllAsQueryable(xx => xx.UserId == userId)
             .Select(xx => new QuickVehicle
             {
                 Id = xx.Id,
@@ -32,6 +29,16 @@ public class VehicleService(IRepository<Vehicle> repo,
                 Plate = xx.Plate,
             })
             .ToListAsync(ct);
+
+        var result = new ResponseDto<List<QuickVehicle>>
+        {
+            Data = vehicles,
+            TotalCount = (uint)vehicles.Count()
+        };
+
+        Log.Logger.Information("Found {@count} vehicles for user {@userId}", result.TotalCount, userId);
+
+        return result;
     }
 
     public List<FuelTypeDto> GetFuelTypes()
@@ -46,15 +53,30 @@ public class VehicleService(IRepository<Vehicle> repo,
 
     public async Task<ResponseDto<Vehicle>> UpsertVehicle(UpsertVehicleDto model)
     {
-        var onDb = await FindByPlate(model.Plate, model.UserId);
-        if (onDb is null) return await AddVehicle(model);
+        model = model with { Plate = model.Plate.Sanitize() };
 
-        return await EditVehicle(model, onDb);
+        var onDb = await FindByPlate(model.Plate, model.UserId);
+        if (onDb.Data is null) return await AddVehicle(model);
+
+        return await EditVehicle(model, onDb.Data);
     }
 
-    public Task<Vehicle?> FindByPlate(string plate, string userId)
+    public async Task<ResponseDto<Vehicle>> FindByPlate(string plate, string userId)
     {
-        return repo.FindAsync(xx => xx.Plate == plate && xx.UserId == userId);
+        var vehicle = await repo.FindAsync(xx => xx.Plate == plate && xx.UserId == userId);
+
+        var result = new ResponseDto<Vehicle>
+        {
+            Data = vehicle,
+        };
+
+        if (vehicle is null)
+        {
+            Log.Logger.Warning("Vehicle with plate {@plate} not found for user {@userId}", plate, userId);
+            result.Errors.Add($"Veicolo con targa {plate} non trovato.");
+        }
+
+        return result;
     }
 
     private async Task<ResponseDto<Vehicle>> AddVehicle(UpsertVehicleDto model)
@@ -76,30 +98,19 @@ public class VehicleService(IRepository<Vehicle> repo,
         await repo.AddAsync(toAdd);
 
         var result = await FindByPlate(model.Plate, model.UserId);
-        if (result is null)
+        if (!result.HasErrors && result.Data is not null)
         {
-            logger.LogError("Errore nella creazione del veicolo con targa {@plate} sull'utente {@userId}.", model.Plate, model.UserId);
-
-            return new()
-            {
-                Errors = [
-                    $"Veicolo con targa {model.Plate} non trovato."
-                ],
-            };
+            Log.Logger.Information("Created vehicle with plate {@plate} and id {@vehicleId} for user {@userId}.", result.Data.Plate, result.Data.Id, result.Data.UserId);
         }
 
-        logger.LogInformation("Creato veicolo con targa {@plate} e id {@vehicleId} sull'utente {@userId}.", result.Plate, result.Id, model.UserId);
-        return new()
-        {
-            Data = toAdd
-        };
+        return result;
     }
 
     private async Task<ResponseDto<Vehicle>> EditVehicle(UpsertVehicleDto model, Vehicle onDb)
     {
         if (onDb.Id != model.Id)
         {
-            logger.LogError("Veicolo con targa {@plate} e id {@vehicleId} non trovato sull'utente {@userId}.", model.Plate, model.Id, model.UserId);
+            Log.Logger.Error("Vehicle whit plate {@plate} and id {@vehicleId} not found for user {@userId}.", model.Plate, model.Id, model.UserId);
 
             return new()
             {
@@ -126,7 +137,7 @@ public class VehicleService(IRepository<Vehicle> repo,
 
         if (result is null)
         {
-            logger.LogCritical("Errore nell'aggiornamento del veicolo con targa {@plate} e id {@vehicleId} non trovato sull'utente {@userId}.", model.Plate, model.Id, model.UserId);
+            Log.Logger.Fatal("Cannot update vehicle with plate {@plate} and id {@vehicleId} for user {@userId}.", model.Plate, model.Id, model.UserId);
 
             return new()
             {
@@ -136,7 +147,7 @@ public class VehicleService(IRepository<Vehicle> repo,
             };
         }
 
-        logger.LogInformation("Aggiornato veicolo con targa {@plate} e id {@vehicleId} sull'utente {@userId}.", model.Plate, model.Id, model.UserId);
+        Log.Logger.Information("Updated vehicle with plate {@plate} and id {@vehicleId} for user {@userId}.", model.Plate, model.Id, model.UserId);
 
         return new()
         {

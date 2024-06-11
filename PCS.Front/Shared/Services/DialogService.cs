@@ -2,12 +2,12 @@
 
 public interface IDialogService
 {
-    Task Alert(string title, string message, string cancel);
+    Task Alert(string title, string message, string? cancel = null);
 }
 
 public class DialogService : IDialogService
 {
-    public Task Alert(string title, string message, string cancel)
+    public Task Alert(string title, string message, string? cancel = null)
     {
         if (Application.Current?.MainPage is null)
             return Task.CompletedTask;

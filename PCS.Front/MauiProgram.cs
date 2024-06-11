@@ -1,9 +1,9 @@
 ﻿using CNAS.Repository.Extensions;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using PCS.Auth.Extensions;
 using PCS.Business.Garage.Extensions;
 using PCS.Front.Shared.Services;
+using Serilog;
 
 namespace PCS.Front;
 
@@ -20,21 +20,24 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
             });
 
-        builder.Services.AddMauiBlazorWebView();
+        Log.Logger = new LoggerConfiguration()
+            .Enrich.FromLogContext()
+            .WriteTo.MongoDB("mongodb://localhost:27017/PCS", "log", Serilog.Events.LogEventLevel.Information)
+            .CreateLogger();
 
         builder.Services
             .AddMongoDb("mongodb://localhost:27017/PCS")
             .AddRepositories()
             .AddGarage()
+            .AddAuth0<MainPage>()
+            .AddTransient<IDialogService, DialogService>()
+            .AddMauiBlazorWebView()
             ;
-
-        builder.Services.TryAddTransient<IDialogService, DialogService>();
 
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
         builder.Logging.AddDebug();
 #endif
-        builder.Services.AddAuth0<MainPage>();
 
         return builder.Build();
     }

@@ -49,10 +49,17 @@ else
             return;
         }
 
-        vehicles = await vehicleService.GetAllVehicles(user.GetUserId()!);
+        var response = await vehicleService.GetAllVehicles(user.GetUserId()!);
+        if (response.HasErrors)
+        {
+            await dialogService.Alert(response.Errors.First(), "OK");
+            return;
+        }
+
+        vehicles = response.Data!;
     }
 
-    public async Task MyCallback()
+    public void MyCallback()
     {
         navigationManager.NavigateTo("/garage/new-vehicle", false, false);
     }
