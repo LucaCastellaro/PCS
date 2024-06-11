@@ -1,0 +1,25 @@
+﻿@page "/"
+
+@using PCS.Auth.Services
+@using PCS.Front.Shared.Services
+@using PCS.Front.Components.Custom
+
+@inject IUserManager userManager;
+@inject IDialogService dialogService;
+@inject NavigationManager navigationManager;
+
+<div class="w-100 h-100 d-flex justify-content-around align-content-around">
+    <div>
+        <h3>SplashScreen</h3>
+    </div>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        if (await userManager.IsLogged()) navigationManager.NavigateTo("garage", false, false);
+        else navigationManager.NavigateTo("login", true, false);
+
+        await base.OnInitializedAsync();
+    }
+}
