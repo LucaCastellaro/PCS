@@ -1,8 +1,11 @@
 ﻿html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     background: #E5E5E5;
-    color: #14213D;
 }
+
+    html, body, .main-color {
+        color: #14213D;
+    }
 
 a, .btn-link {
     color: #006bb7;

@@ -1,0 +1,72 @@
+﻿@page "/garage/{vehicleId}"
+
+@using PCS.Auth.Services
+@using PCS.Business.Garage.Services
+@using PCS.Common.Entities.Models.Entities
+@using PCS.Front.Shared.Services
+@using PCS.Front.Components.Custom
+@using PCS.Auth.Extensions
+@using PCS.Front.Components.Layout
+@using System.Security.Claims
+
+@inject IDialogService dialogService
+@inject IVehicleService vehicleService
+@inject IUserManager userManager
+@inject NavigationManager navigationManager
+
+<div>
+    <button class="btn-back rounded-pill text-uppercase fw-semibold py-1 px-2 main-color mb-3" @onclick=@OnGoBack>
+        <i class="bi bi-caret-left-fill" />Garage
+    </button>
+</div>
+
+<div>
+    <h3>@vehicle?.Name</h3>  
+</div>
+
+<VehicleTabs VehicleId=@vehicleId />
+
+@code {
+    [Parameter]
+    public required string vehicleId { get; set; }
+
+    public Vehicle? vehicle;
+
+    public ClaimsPrincipal? principal;
+
+    protected override async Task OnInitializedAsync()
+    {
+        principal = await userManager.GetAuthenticatedUser();
+        if (principal is null)
+        {
+            navigationManager.NavigateTo("", true, false);
+            return;
+        }
+
+        await GetVehicleById();
+    }
+
+    private void OnGoBack()
+    {
+        navigationManager.NavigateTo("garage");
+    }
+
+    private async Task GetVehicleById()
+    {
+        if (string.IsNullOrWhiteSpace(vehicleId))
+        {
+            await dialogService.Alert("Nessun veicolo selezionato", "OK");
+            return;
+        }
+
+        var response = await vehicleService.FindById(vehicleId, principal!.GetUserId()!);
+
+        if (response.HasErrors)
+        {
+            await dialogService.Alert(response.Errors.First(), "OK");
+            return;
+        }
+
+        vehicle = response.Data;
+    }
+}

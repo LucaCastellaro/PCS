@@ -15,6 +15,7 @@ public interface IVehicleService
     List<FuelTypeDto> GetFuelTypes();
     Task<ResponseDto<Vehicle>> UpsertVehicle(UpsertVehicleDto model);
     Task<ResponseDto<Vehicle>> FindByPlate(string plate, string userId);
+    Task<ResponseDto<Vehicle>> FindById(string vehicleId, string userId);
 }
 
 public sealed class VehicleService(IRepository<Vehicle> repo) : IVehicleService
@@ -33,7 +34,7 @@ public sealed class VehicleService(IRepository<Vehicle> repo) : IVehicleService
         var result = new ResponseDto<List<QuickVehicle>>
         {
             Data = vehicles,
-            TotalCount = (uint)vehicles.Count()
+            TotalCount = (uint)vehicles.Count
         };
 
         Log.Logger.Information("Found {@count} vehicles for user {@userId}", result.TotalCount, userId);
@@ -63,14 +64,12 @@ public sealed class VehicleService(IRepository<Vehicle> repo) : IVehicleService
 
     public async Task<ResponseDto<Vehicle>> FindByPlate(string plate, string userId)
     {
-        var vehicle = await repo.FindAsync(xx => xx.Plate == plate && xx.UserId == userId);
-
         var result = new ResponseDto<Vehicle>
         {
-            Data = vehicle,
+            Data = await repo.FindAsync(xx => xx.Plate == plate && xx.UserId == userId),
         };
 
-        if (vehicle is null)
+        if (result.Data is null)
         {
             Log.Logger.Warning("Vehicle with plate {@plate} not found for user {@userId}", plate, userId);
             result.Errors.Add($"Veicolo con targa {plate} non trovato.");
@@ -110,7 +109,7 @@ public sealed class VehicleService(IRepository<Vehicle> repo) : IVehicleService
     {
         if (onDb.Id != model.Id)
         {
-            Log.Logger.Error("Vehicle whit plate {@plate} and id {@vehicleId} not found for user {@userId}.", model.Plate, model.Id, model.UserId);
+            Log.Logger.Error("Vehicle with plate {@plate} and id {@vehicleId} not found for user {@userId}.", model.Plate, model.Id, model.UserId);
 
             return new()
             {
@@ -153,5 +152,22 @@ public sealed class VehicleService(IRepository<Vehicle> repo) : IVehicleService
         {
             Data = result
         };
+    }
+
+    public async Task<ResponseDto<Vehicle>> FindById(string vehicleId, string userId)
+    {
+        var result = new ResponseDto<Vehicle>()
+        {
+            Data = await repo.FindAsync(xx => xx.Id == vehicleId && xx.UserId == userId),
+        };
+
+        if(result.Data is null)
+        {
+            Log.Logger.Error("Vehicle with id {@vehicleId} not found for user {@userId}.", vehicleId, userId);
+
+            result.Errors.Add("Veicolo non trovato.");
+        }
+
+        return result;
     }
 }

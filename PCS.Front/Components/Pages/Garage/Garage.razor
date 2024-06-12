@@ -18,10 +18,17 @@
 {
     @foreach (var item in vehicles)
     {
-        <div class="mb-3">
+        <div class="mb-3" @onclick="() => OnGoToDetail(item)">
             <Card>
-                <div class="fw-bold" style="font-size: 16px">@item.Name</div>
-                <div style="font-size: 12px">@item.Plate</div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fw-bold" style="font-size: 16px">@item.Name</div>
+                        <div style="font-size: 12px">@item.Plate</div>
+                    </div>
+                    <div>
+                        <i class="bi bi-chevron-right main-color" />
+                    </div>
+                </div>
             </Card>
         </div>
     }
@@ -34,8 +41,8 @@ else
     </div>
 }
 
-<FAB OnCallback=@MyCallback>
-    <i class="bi bi-plus"></i>
+<FAB OnCallback=@OnNewVehicle>
+    <i class="bi bi-plus" />
 </FAB>
 @code {
     private List<QuickVehicle> vehicles = [];
@@ -59,7 +66,13 @@ else
         vehicles = response.Data!;
     }
 
-    public void MyCallback()
+    public void OnGoToDetail(QuickVehicle item)
+    {
+        navigationManager.NavigateTo($"/garage/{item.Id}", false, false);
+
+    }
+
+    public void OnNewVehicle()
     {
         navigationManager.NavigateTo("/garage/new-vehicle", false, false);
     }

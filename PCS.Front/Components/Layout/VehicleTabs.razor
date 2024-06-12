@@ -1,0 +1,92 @@
+﻿<div class="d-flex justify-content-evenly">
+    @foreach (var item in menuItems)
+    {
+        <div class=@TabClass(item) @onclick="() => OnSetActive(item)">
+            @item.Label
+        </div>
+    }
+</div>
+
+@if(menuItems[0].IsActive){
+    <PCS.Front.Components.Pages.Garage.Overview.VehicleOverview VehicleId=@VehicleId />
+}
+else if (menuItems[1].IsActive)
+{
+    <span>rifornimenti</span>
+}
+else if (menuItems[2].IsActive)
+{
+    <span>grafici</span>
+}
+else if (menuItems[3].IsActive)
+{
+    <span>promemoria</span>
+}
+else if (menuItems[4].IsActive)
+{
+    <span>dettagli</span>
+}
+else if (menuItems[5].IsActive)
+{
+    <span>percorrenze</span>
+}
+@code {
+    [Parameter]
+    public required string VehicleId { get; set; }
+
+    private Shared.Models.TabItem[] menuItems = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        menuItems = [
+                new() {
+                    Label = "Panoramica",
+                    Ref = $"/garage/{VehicleId}/overview",
+                    IsActive = true
+                },
+    new() {
+                    Label = "Rifornimenti",
+                    Ref = $"/garage/{VehicleId}/refuels",
+                    IsActive = false
+                },
+    new () {
+                    Label = "Grafici",
+                    Ref = $"/garage/{VehicleId}/trends",
+                    IsActive = false
+                },
+    new () {
+                    Label = "Promemoria ",
+                    Ref = $"/garage/{VehicleId}/memorandums",
+                    IsActive = false
+                },
+    new () {
+                    Label = "Dettagli",
+                    Ref = $"/garage/{VehicleId}/details",
+                    IsActive = false
+                },
+    new () {
+                    Label = "Percorrenze",
+                    Ref = $"/garage/{VehicleId}/journeys",
+                    IsActive = false
+                },
+    ];
+
+        await base.OnInitializedAsync();
+    }
+
+    private string TabClass(Shared.Models.TabItem item)
+    {
+        var result = "tab-item main-color px-3";
+        if (item.IsActive) result =  $"{result} active";
+
+        return result;
+    }
+
+    private void OnSetActive(Shared.Models.TabItem selected)
+    {
+        foreach (var item in menuItems)
+        {
+            item.IsActive = item.Ref == selected.Ref;
+        }    
+    }
+}

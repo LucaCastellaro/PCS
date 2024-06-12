@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PCS.Business.Refuel", "Busi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PCS.Business.Garage", "Back\Business\PCS.Business.Garage\PCS.Business.Garage.csproj", "{D8117C11-ED1B-4797-A515-A9B0CDDC8459}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCS.Common.Business", "Common\PCS.Common.Business\PCS.Common.Business.csproj", "{D9CC9975-386D-4BB9-A6F3-E57DAE595D64}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PCS.Common.Business", "Common\PCS.Common.Business\PCS.Common.Business.csproj", "{D9CC9975-386D-4BB9-A6F3-E57DAE595D64}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

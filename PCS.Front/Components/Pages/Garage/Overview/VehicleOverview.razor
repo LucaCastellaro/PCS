@@ -1,0 +1,12 @@
+﻿@page "/garage/{VehicleId}/overview";
+
+@using PCS.Front.Components.Layout
+
+<h3>VehicleOverview</h3>
+
+<p>id veicolo: @VehicleId</p>
+
+@code {
+    [Parameter]
+    public required string VehicleId { get; set; }
+}

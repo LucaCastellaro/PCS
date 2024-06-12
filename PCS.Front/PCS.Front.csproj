@@ -70,4 +70,12 @@
       <ProjectReference Include="..\Business\PCS.Business.Refuel\PCS.Business.Refuel.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Components\Pages\Garage\Memorandums\" />
+      <Folder Include="Components\Pages\Garage\Details\" />
+      <Folder Include="Components\Pages\Garage\Journeys\" />
+      <Folder Include="Components\Pages\Garage\Refuels\" />
+      <Folder Include="Components\Pages\Garage\Trends\" />
+    </ItemGroup>
+
 </Project>
