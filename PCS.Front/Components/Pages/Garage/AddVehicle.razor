@@ -12,40 +12,44 @@
 @inject IUserManager userManager
 @inject NavigationManager navigationManager
 
-<h3>Nuovo veicolo</h3>
-
-<Card>
-    <form>
-        <div class="mb-3">
-            <label for="name" class="form-label">Nome</label>
-            <input type="text" class="form-control text-uppercase" id="name" @bind=name />
-        </div>
-        <div class="mb-3">
-            <label for="plate" class="form-label">Targa</label>
-            <input type="text" class="form-control text-uppercase" id="plate" @bind=plate />
-        </div>
-        <div class="mb-3">
-            <label for="date" class="form-label">Data di acquisto</label>
-            <input type="date" class="form-control" id="date" @bind=buyDate />
-        </div>
-        <div class="mb-3">
-            <label for="totalKm" class="form-label">Km totali</label>
-            <input type="number" class="form-control" id="totalKm" @bind=totalKm />
-        </div>
-        <div class="mb-3">
-            <label for="fuel-type" class="form-label">Alimentazione</label>
-            <select class="form-select" id="fuel-type" @bind=fuelType>
-                @foreach(var item in fuelTypes) {
-                    <option value=@item.Value>@item.Label</option>
-                }
-            </select>
-        </div>
-        <div class="d-flex justify-content-evenly">
-            <button class="rounded-pill py-2 px-3 btn-cancel fw-bold" @onclick=OnCancel>Annulla</button>
-            <button class="rounded-pill py-2 px-3 btn-save fw-bold" @onclick=OnSave>Salva</button>
-        </div>
-    </form>
-</Card>
+<div class="mb-3">
+    <div class="mb-3">
+        <span class="fw-semibold">Nuovo veicolo</span>
+    </div>
+    <Card>
+        <form>
+            <div class="mb-3">
+                <label for="name" class="form-label">Nome</label>
+                <input type="text" class="form-control text-uppercase" id="name" @bind=name />
+            </div>
+            <div class="mb-3">
+                <label for="plate" class="form-label">Targa</label>
+                <input type="text" class="form-control text-uppercase" id="plate" @bind=plate />
+            </div>
+            <div class="mb-3">
+                <label for="date" class="form-label">Data di acquisto</label>
+                <input type="date" class="form-control" id="date" @bind=buyDate />
+            </div>
+            <div class="mb-3">
+                <label for="totalKm" class="form-label">Km totali</label>
+                <input type="number" class="form-control" id="totalKm" @bind=totalKm />
+            </div>
+            <div class="mb-3">
+                <label for="fuel-type" class="form-label">Alimentazione</label>
+                <select class="form-select" id="fuel-type" @bind=fuelType>
+                    @foreach (var item in fuelTypes)
+                    {
+                        <option value=@item.Value>@item.Label</option>
+                    }
+                </select>
+            </div>
+            <div class="d-flex justify-content-evenly">
+                <button class="rounded-pill py-2 px-3 btn-cancel fw-bold" @onclick=OnCancel>Annulla</button>
+                <button class="rounded-pill py-2 px-3 btn-save fw-bold" @onclick=OnSave>Salva</button>
+            </div>
+        </form>
+    </Card>
+</div>
 
 @code {
     ClaimsPrincipal? principal;
@@ -53,7 +57,7 @@
     List<FuelTypeDto> fuelTypes = [];
 
     string name = string.Empty;
-    string plate  = string.Empty;
+    string plate = string.Empty;
     DateTime buyDate = DateTime.Now;
     FuelType fuelType = FuelType.Gasoline;
     decimal totalKm = 0;
@@ -90,13 +94,13 @@
         }
 
         await vehicleService.UpsertVehicle(new()
-        {
-            UserId = principal.GetUserId()!,
-            Name = name,
-            BuyDate = buyDate,
-            FuelType = fuelType,
-            Plate = plate,
-            TotalKm = totalKm
+            {
+                UserId = principal.GetUserId()!,
+                Name = name,
+                BuyDate = buyDate,
+                FuelType = fuelType,
+                Plate = plate,
+                TotalKm = totalKm
             });
 
         navigationManager.NavigateTo("/garage", true, false);
