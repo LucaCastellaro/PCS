@@ -18,7 +18,7 @@
 {
     @foreach (var item in vehicles)
     {
-        <div class="mb-3" @onclick="() => OnGoToDetail(item)">
+        <div class="mb-3" role="button" @onclick="() => OnGoToDetail(item)">
             <Card>
                 <div class="d-flex justify-content-between align-items-center">
                     <div>

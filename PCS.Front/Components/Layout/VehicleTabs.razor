@@ -1,4 +1,4 @@
-﻿<div class="d-flex justify-content-evenly">
+﻿<div class="d-flex justify-content-evenly w-100 overflow-x-scroll">
     @foreach (var item in menuItems)
     {
         <div class=@TabClass(item) @onclick="() => OnSetActive(item)">
@@ -12,7 +12,7 @@
 }
 else if (menuItems[1].IsActive)
 {
-    <span>rifornimenti</span>
+    <PCS.Front.Components.Pages.Garage.Refuels.Refuels VehicleId=@VehicleId />
 }
 else if (menuItems[2].IsActive)
 {
@@ -76,7 +76,7 @@ else if (menuItems[5].IsActive)
 
     private string TabClass(Shared.Models.TabItem item)
     {
-        var result = "tab-item main-color px-3";
+        var result = "tab-item main-color px-3 mb-3";
         if (item.IsActive) result =  $"{result} active";
 
         return result;

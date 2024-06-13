@@ -1,5 +1,4 @@
-﻿using CNAS.Repository.Models.Entities;
-using MongoDB.Bson.Serialization.Attributes;
+﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
 
 namespace PCS.Common.Entities.Models.Entities;
@@ -39,7 +38,8 @@ public sealed record CalculatedData
 {
     [BsonRepresentation(BsonType.Decimal128)] public required decimal TotalCost { get; init; }
 
-    [BsonRepresentation(BsonType.Decimal128)] public required decimal Liters { get; init; }
     [BsonRepresentation(BsonType.Decimal128)] public required decimal Consumptions { get; init; }
     [BsonRepresentation(BsonType.Decimal128)] public required decimal Autonomy { get; init; }
+    [BsonRepresentation(BsonType.Decimal128)] public required decimal WeightedConsumptions { get; init; }
+    [BsonRepresentation(BsonType.Decimal128)] public required decimal WeightedAutonomy { get; init; }
 }

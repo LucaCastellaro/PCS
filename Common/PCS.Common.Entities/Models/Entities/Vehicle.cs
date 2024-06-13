@@ -1,5 +1,4 @@
-﻿using CNAS.Repository.Models.Entities;
-using MongoDB.Bson.Serialization.Attributes;
+﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
 
 namespace PCS.Common.Entities.Models.Entities;

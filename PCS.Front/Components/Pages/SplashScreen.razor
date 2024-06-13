@@ -19,7 +19,5 @@
     {
         if (await userManager.IsLogged()) navigationManager.NavigateTo("garage", false, false);
         else navigationManager.NavigateTo("login", true, false);
-
-        await base.OnInitializedAsync();
     }
 }

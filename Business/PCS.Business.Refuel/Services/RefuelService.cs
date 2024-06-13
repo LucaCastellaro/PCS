@@ -1,13 +1,18 @@
 ﻿using MongoDB.Driver.Linq;
-using PCS.Business.Refuel.Extensions;
 using Entities = PCS.Common.Entities.Models.Entities;
-using SpRepo.Abstraction;
+using MongoDB.Driver;
+using PCS.Business.Refuel.Models.DTOs;
+using MongoDB.Bson;
+using PCS.Common.Business.Extensions;
+using PCS.Common.Business;
 
 namespace PCS.Business.Refuel.Services;
 
 public interface IRefuelService
 {
+    Task<ResponseDto<Entities.Refuel>> AddRefuel(AddRefuelDTO model);
     Task<int> CountRefuels(string vehicleId);
+    Task<List<Entities.QuickRefuel>> GetAllQuickByVehicleAsync(string vehicleId);
     IMongoQueryable<Entities.Refuel> GetAllByVehicle(string vehicleId);
     Task<List<Entities.Refuel>> GetAllByVehicleAsync(string vehicleId);
     Task<decimal> GetAverageAutonomy(string vehicleId);
@@ -21,13 +26,70 @@ public interface IRefuelService
     Task<decimal> SumWeightedConsumptions(string vehicleId);
 }
 
+// TODO: LOGS
 public sealed class RefuelService(IRepository<Entities.Refuel> repo) : IRefuelService
 {
+    public async Task<ResponseDto<Entities.Refuel>> AddRefuel(AddRefuelDTO model)
+    {
+        var calculatedAutonomy = model.Liters * model.Consumptions;
+        var calculatedconsumptions = model.Autonomy / model.Liters;
+
+        var objectId = ObjectId.GenerateNewId().ToString();
+
+        var toAdd = new Entities.Refuel()
+        {
+            Id = objectId,
+            Vehicle = model.Vehicle,
+            MeasuredData = new()
+            {
+                Autonomy = model.Autonomy.Round(3),
+                Consumptions = model.Consumptions.Round(3),
+                Date = model.Date,
+                Km = model.Km.Round(3),
+                Liters = model.Liters.Round(3),
+                Station = model.Station.Sanitize(),
+                UnitCost = model.UnitCost.Round(3),
+            },
+            CalculatedData = new()
+            {
+                Autonomy = calculatedAutonomy.Round(3),
+                Consumptions = calculatedconsumptions.Round(3),
+                TotalCost = (model.UnitCost * model.Liters).Round(3),
+                WeightedConsumptions = GetWeightedConsumptions(calculatedconsumptions, calculatedAutonomy).Round(3),
+                WeightedAutonomy = GetWeightedAutonomy(model.Liters, calculatedAutonomy).Round(3)
+            }
+        };
+
+        await repo.AddAsync(toAdd);
+
+        var result = new ResponseDto<Entities.Refuel>
+        {
+            Data = await repo.FindByIdAsync(objectId)
+        };
+
+        if (result.Data is null) {
+            result.Errors.Add($"Impossibile aggiungere il rifornimento al veicolo targato {model.Vehicle.Plate}");
+        }
+
+        return result;
+    }
+
     public IMongoQueryable<Entities.Refuel> GetAllByVehicle(string vehicleId)
         => repo.FindAllAsQueryable(xx => xx.Vehicle.Id == vehicleId);
 
     public async Task<List<Entities.Refuel>> GetAllByVehicleAsync(string vehicleId)
         => await repo.FindAllAsync(xx => xx.Vehicle.Id == vehicleId);
+
+    public async Task<List<Entities.QuickRefuel>> GetAllQuickByVehicleAsync(string vehicleId)
+        => await GetAllByVehicle(vehicleId)
+            .Select(xx => new Entities.QuickRefuel
+            {
+                Id = xx.Id,
+                Cost = xx.CalculatedData.TotalCost,
+                Date = xx.MeasuredData.Date,
+                Station = xx.MeasuredData.Station
+            })
+            .ToListAsync();
 
     public async Task<int> CountRefuels(string vehicleId)
         => (int)await repo.CountAsync(xx => xx.Vehicle.Id == vehicleId);
@@ -54,8 +116,12 @@ public sealed class RefuelService(IRepository<Entities.Refuel> repo) : IRefuelSe
         => await GetAllByVehicle(vehicleId).SumAsync(xx => xx.CalculatedData.TotalCost);
 
     public async Task<decimal> SumWeightedConsumptions(string vehicleId)
-        => (await GetAllByVehicleAsync(vehicleId)).Sum(xx => xx.GetWeightedConsumptions());
+        => (await GetAllByVehicleAsync(vehicleId)).Sum(xx => xx.CalculatedData.WeightedConsumptions);
 
     public async Task<decimal> SumWeightedAutonomy(string vehicleId)
-        => (await GetAllByVehicleAsync(vehicleId)).Sum(xx => xx.GetWeightedAutonomy());
+        => (await GetAllByVehicleAsync(vehicleId)).Sum(xx => xx.CalculatedData.WeightedAutonomy);
+
+    private decimal GetWeightedAutonomy(decimal liters, decimal autonomy) => liters * autonomy;
+
+    private decimal GetWeightedConsumptions(decimal consumptions, decimal autonomy) => consumptions * autonomy;
 }

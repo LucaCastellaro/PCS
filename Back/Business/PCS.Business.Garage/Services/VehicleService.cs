@@ -1,11 +1,10 @@
 ﻿using PCS.Common.Entities.Models.Entities;
-using SpRepo.Abstraction;
 using MongoDB.Driver.Linq;
 using MongoDB.Driver;
 using PCS.Common.Entities.Models.Dtos;
 using PCS.Business.Garage.Models.DTOs;
 using PCS.Common.Business.Extensions;
-using Serilog;
+using PCS.Common.Business;
 
 namespace PCS.Business.Garage.Services;
 
@@ -16,6 +15,7 @@ public interface IVehicleService
     Task<ResponseDto<Vehicle>> UpsertVehicle(UpsertVehicleDto model);
     Task<ResponseDto<Vehicle>> FindByPlate(string plate, string userId);
     Task<ResponseDto<Vehicle>> FindById(string vehicleId, string userId);
+    Task<ResponseDto<QuickVehicle>> FindQuickById(string vehicleId, string userId);
 }
 
 public sealed class VehicleService(IRepository<Vehicle> repo) : IVehicleService
@@ -36,8 +36,6 @@ public sealed class VehicleService(IRepository<Vehicle> repo) : IVehicleService
             Data = vehicles,
             TotalCount = (uint)vehicles.Count
         };
-
-        Log.Logger.Information("Found {@count} vehicles for user {@userId}", result.TotalCount, userId);
 
         return result;
     }
@@ -71,7 +69,6 @@ public sealed class VehicleService(IRepository<Vehicle> repo) : IVehicleService
 
         if (result.Data is null)
         {
-            Log.Logger.Warning("Vehicle with plate {@plate} not found for user {@userId}", plate, userId);
             result.Errors.Add($"Veicolo con targa {plate} non trovato.");
         }
 
@@ -97,10 +94,6 @@ public sealed class VehicleService(IRepository<Vehicle> repo) : IVehicleService
         await repo.AddAsync(toAdd);
 
         var result = await FindByPlate(model.Plate, model.UserId);
-        if (!result.HasErrors && result.Data is not null)
-        {
-            Log.Logger.Information("Created vehicle with plate {@plate} and id {@vehicleId} for user {@userId}.", result.Data.Plate, result.Data.Id, result.Data.UserId);
-        }
 
         return result;
     }
@@ -109,8 +102,6 @@ public sealed class VehicleService(IRepository<Vehicle> repo) : IVehicleService
     {
         if (onDb.Id != model.Id)
         {
-            Log.Logger.Error("Vehicle with plate {@plate} and id {@vehicleId} not found for user {@userId}.", model.Plate, model.Id, model.UserId);
-
             return new()
             {
                 Errors = [
@@ -136,8 +127,6 @@ public sealed class VehicleService(IRepository<Vehicle> repo) : IVehicleService
 
         if (result is null)
         {
-            Log.Logger.Fatal("Cannot update vehicle with plate {@plate} and id {@vehicleId} for user {@userId}.", model.Plate, model.Id, model.UserId);
-
             return new()
             {
                 Errors = [
@@ -145,8 +134,6 @@ public sealed class VehicleService(IRepository<Vehicle> repo) : IVehicleService
                 ],
             };
         }
-
-        Log.Logger.Information("Updated vehicle with plate {@plate} and id {@vehicleId} for user {@userId}.", model.Plate, model.Id, model.UserId);
 
         return new()
         {
@@ -161,10 +148,31 @@ public sealed class VehicleService(IRepository<Vehicle> repo) : IVehicleService
             Data = await repo.FindAsync(xx => xx.Id == vehicleId && xx.UserId == userId),
         };
 
-        if(result.Data is null)
+        if (result.Data is null)
         {
-            Log.Logger.Error("Vehicle with id {@vehicleId} not found for user {@userId}.", vehicleId, userId);
+            result.Errors.Add("Veicolo non trovato.");
+        }
 
+        return result;
+    }
+    public async Task<ResponseDto<QuickVehicle>> FindQuickById(string vehicleId, string userId)
+    {
+        var vehicle = (await FindById(vehicleId, userId))?.Data;
+
+        var result = new ResponseDto<QuickVehicle>()
+        {
+            Data = vehicle is null
+                ? null
+                : new()
+                {
+                    Id = vehicle.Id,
+                    Name = vehicle.Name,
+                    Plate = vehicle.Plate,
+                }
+        };
+
+        if (result.Data is null)
+        {
             result.Errors.Add("Veicolo non trovato.");
         }
 

@@ -1,0 +1,124 @@
+﻿@page "/garage/{VehicleId}/refuels/new";
+
+@using PCS.Business.Refuel.Services
+
+@using PCS.Auth.Services
+@using PCS.Business.Garage.Services
+@using PCS.Common.Entities.Models.Entities
+@using PCS.Front.Shared.Services
+@using PCS.Front.Components.Custom
+@using PCS.Auth.Extensions
+@using PCS.Front.Components.Layout
+@using System.Security.Claims
+
+@inject IDialogService dialogService
+@inject IVehicleService vehicleService
+@inject IUserManager userManager
+@inject NavigationManager navigationManager
+@inject IRefuelService refuelService
+
+
+<div class="mb-3">
+    <div class="mb-3">
+        <span class="fw-semibold">Nuovo rifornimento</span>
+    </div>
+    <div>
+        <Card>
+            <form>
+                <div class="mb-3">
+                    <label for="station" class="form-label">Stazione di servizio</label>
+                    <input type="text" class="form-control text-uppercase" id="station" @bind=station />
+                </div>
+                <div class="mb-3">
+                    <label for="date" class="form-label">Data</label>
+                    <input type="date" class="form-control text-uppercase" id="date" @bind=date />
+                </div>
+                <div class="mb-3">
+                    <label for="km" class="form-label">Km</label>
+                    <input type="km" class="form-control text-uppercase" id="km" @bind=km />
+                </div>
+                <div class="mb-3">
+                    <label for="consumptions" class="form-label">Consumi</label>
+                    <input type="consumptions" class="form-control text-uppercase" id="consumptions" @bind=consumptions />
+                </div>
+                <div class="mb-3">
+                    <label for="unitCost" class="form-label">Prezzo al litro</label>
+                    <input type="unitCost" class="form-control text-uppercase" id="unitCost" @bind=unitCost />
+                </div>
+                <div class="mb-3">
+                    <label for="liters" class="form-label">Litri</label>
+                    <input type="liters" class="form-control text-uppercase" id="liters" @bind=liters />
+                </div>
+                <div class="mb-3">
+                    <label for="autonomy" class="form-label">Autonomia</label>
+                    <input type="autonomy" class="form-control text-uppercase" id="autonomy" @bind=autonomy />
+                </div>
+                <div class="d-flex justify-content-evenly">
+                    <button class="rounded-pill py-2 px-3 btn-cancel fw-bold" @onclick=OnCancel>Annulla</button>
+                    <button class="rounded-pill py-2 px-3 btn-save fw-bold" @onclick=OnSave>Salva</button>
+                </div>
+            </form>
+        </Card>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public required string VehicleId { get; set; }
+
+    public ClaimsPrincipal? principal;
+
+    public string station = string.Empty;
+    public DateTime date = DateTime.Now;
+    public decimal km = 0;
+    public decimal consumptions = 0;
+    public decimal unitCost = 0;
+    public decimal liters = 0;
+    public decimal autonomy = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        principal = await userManager.GetAuthenticatedUser();
+        if (principal is null)
+        {
+            navigationManager.NavigateTo("", true, false);
+            return;
+        }
+    }
+
+    private void OnCancel()
+    {
+        navigationManager.NavigateTo($"/garage/{VehicleId}/refuels", true, false);
+        return;
+    }
+
+    private async Task OnSave()
+    {
+        var vehicle = await vehicleService.FindQuickById(VehicleId, principal!.GetUserId()!);
+        if (vehicle.HasErrors)
+        {
+            await dialogService.Alert("Attenzione", vehicle.Errors.First(), "OK");
+            return;
+        }
+
+        var result = await refuelService.AddRefuel(new()
+            {
+                Vehicle = vehicle.Data!,
+                Autonomy = autonomy,
+                Consumptions = consumptions,
+                Date = date,
+                Km = km,
+                Liters = liters,
+                Station = station,
+                UnitCost = unitCost,
+            });
+
+        if(!result.HasErrors)
+        {
+            navigationManager.NavigateTo($"/garage/{VehicleId}/refuels", true, false);
+            return;
+        }
+
+        await dialogService.Alert("Attenzione", result.Errors.First(), "OK");    
+    }
+}

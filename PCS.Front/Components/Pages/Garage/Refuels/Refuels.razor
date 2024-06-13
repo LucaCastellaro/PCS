@@ -1,0 +1,75 @@
+﻿@page "/garage/{VehicleId}/refuels";
+
+@using PCS.Business.Refuel.Services
+
+@using PCS.Auth.Services
+@using PCS.Business.Garage.Services
+@using PCS.Common.Entities.Models.Entities
+@using PCS.Front.Shared.Services
+@using PCS.Front.Components.Custom
+@using PCS.Auth.Extensions
+@using PCS.Front.Components.Layout
+@using System.Security.Claims
+
+@inject IDialogService dialogService
+@inject IVehicleService vehicleService
+@inject IUserManager userManager
+@inject NavigationManager navigationManager
+@inject IRefuelService refuelService
+
+@if (!refuels.Any())
+{
+    <div>
+        <p>
+            Nessun rifornimento trovato.
+        </p>
+        <p>
+            Puoi aggiungere un nuovo rifornimento con il pulsante in basso a destra.
+        </p>
+    </div>
+}
+else
+{
+    @foreach(var item in refuels)
+    {
+        <div class="mb-3" role="button">
+            <Card>
+                <div class="d-flex justify-content-between">
+                    <div>@item.Station</div>
+                    <div>@item.Date</div>
+                </div>
+            </Card>
+        </div>
+    }
+}
+
+<FAB OnCallback=@OnNewRefuel>
+    <i class="bi bi-plus" />
+</FAB>
+
+@code {
+    [Parameter]
+    public required string VehicleId { get; set; }
+
+    public ClaimsPrincipal? principal;
+
+    public List<PCS.Common.Entities.Models.Entities.QuickRefuel> refuels = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        principal = await userManager.GetAuthenticatedUser();
+        if (principal is null)
+        {
+            navigationManager.NavigateTo("", true, false);
+            return;
+        }
+
+        refuels = await refuelService.GetAllQuickByVehicleAsync(VehicleId) ?? [];
+    }
+
+    private void OnNewRefuel()
+    {
+        navigationManager.NavigateTo($"/garage/{VehicleId}/refuels/new", false, false);
+        return;
+    }
+}

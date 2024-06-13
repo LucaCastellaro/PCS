@@ -89,3 +89,15 @@ h1:focus {
         padding-left: env(safe-area-inset-left);
     }
 }
+
+.btn-cancel {
+    color: #14213D;
+    border: 2px solid #14213D;
+    background: transparent;
+}
+
+.btn-save {
+    background: #FCA311;
+    color: white;
+    border: 2px solid #FCA311;
+}

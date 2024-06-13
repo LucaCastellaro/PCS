@@ -27,13 +27,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (await userManager.IsLogged())
-        {
-            navigationManager.NavigateTo("garage", false, false);
-            return;
-        }
-
-        await base.OnInitializedAsync();
+        if (await userManager.IsLogged()) navigationManager.NavigateTo("garage", false, false);
     }
 
     private async Task OnLogin()

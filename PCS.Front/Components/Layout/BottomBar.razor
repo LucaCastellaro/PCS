@@ -18,11 +18,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (!await userManager.IsLogged())
-        {
-            navigationManager.NavigateTo("", false, false);
-            return;
-        }
+        if (!await userManager.IsLogged()) return;
 
         isLoading = true;
 
