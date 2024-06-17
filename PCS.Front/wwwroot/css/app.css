@@ -101,3 +101,9 @@ h1:focus {
     color: white;
     border: 2px solid #FCA311;
 }
+
+.btn-back {
+    background: #14213D22;
+    border: none;
+    font-size: 12px;
+}

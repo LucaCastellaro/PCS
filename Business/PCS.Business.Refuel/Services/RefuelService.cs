@@ -24,9 +24,10 @@ public interface IRefuelService
     Task<decimal> SumTotalCosts(string vehicleId);
     Task<decimal> SumWeightedAutonomy(string vehicleId);
     Task<decimal> SumWeightedConsumptions(string vehicleId);
+    Task<Entities.Refuel?> GetById(string id);
+    Task<bool> DeleteById(string id);
 }
 
-// TODO: LOGS
 public sealed class RefuelService(IRepository<Entities.Refuel> repo) : IRefuelService
 {
     public async Task<ResponseDto<Entities.Refuel>> AddRefuel(AddRefuelDTO model)
@@ -73,6 +74,12 @@ public sealed class RefuelService(IRepository<Entities.Refuel> repo) : IRefuelSe
 
         return result;
     }
+
+    public async Task<Entities.Refuel?> GetById(string id)
+        => await repo.FindByIdAsync(id);
+
+    public async Task<bool> DeleteById(string id)
+        => await repo.DeleteAsync(id);
 
     public IMongoQueryable<Entities.Refuel> GetAllByVehicle(string vehicleId)
         => repo.FindAllAsQueryable(xx => xx.Vehicle.Id == vehicleId);

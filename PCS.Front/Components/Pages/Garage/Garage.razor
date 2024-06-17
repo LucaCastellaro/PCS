@@ -59,7 +59,7 @@ else
         var response = await vehicleService.GetAllVehicles(user.GetUserId()!);
         if (response.HasErrors)
         {
-            await dialogService.Alert(response.Errors.First(), "OK");
+            await dialogService.Alert("Errore", response.Errors.First(), "OK");
             return;
         }
 

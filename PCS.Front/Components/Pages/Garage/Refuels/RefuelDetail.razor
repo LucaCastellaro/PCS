@@ -1,0 +1,135 @@
+﻿@page "/garage/{VehicleId}/refuels/{RefuelId}";
+
+@using PCS.Auth.Services
+@using PCS.Business.Garage.Services
+@using PCS.Business.Refuel.Services
+@using PCS.Common.Entities.Models.Entities
+@using PCS.Front.Shared.Services
+@using PCS.Front.Components.Custom
+@using PCS.Auth.Extensions
+@using PCS.Front.Components.Layout
+@using System.Security.Claims
+
+@inject IDialogService dialogService
+@inject IVehicleService vehicleService
+@inject IUserManager userManager
+@inject NavigationManager navigationManager
+@inject IRefuelService refuelService
+
+<Loader IsLoading=@isLoading>
+    @if (refuel is null)
+    {
+        <Card>Rifornimento non trovato.</Card>
+    }
+    else
+    {
+        <div>
+            <button class="btn-back rounded-pill text-uppercase fw-semibold py-1 px-2 main-color mb-3" @onclick=@OnGoBack>
+                <i class="bi bi-caret-left-fill" />Rifornimenti
+            </button>
+        </div>
+        <div class="mb-3">
+            <div class="mb-1 fw-bold">Dati rilevati</div>
+            <div style="font-size: 14px">
+                <Card>
+                    <div class="d-flex justify-content-between">
+                        <div class="fw-bold">Stazione di servizio</div>
+                        <div class="px-2">@refuel.MeasuredData.Station</div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <div class="fw-bold">Data</div>
+                        <div class="px-2">@refuel.MeasuredData.Date</div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <div class="fw-bold">Km</div>
+                        <div class="px-2">@refuel.MeasuredData.Km Km</div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <div class="fw-bold">Consumi</div>
+                        <Compare Source=@refuel.MeasuredData.Consumptions Comparison=@refuel.CalculatedData.Consumptions>
+                            <div>@refuel.MeasuredData.Consumptions Km / L</div>
+                        </Compare>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <div class="fw-bold">Prezzo benzina</div>
+                        <div class="px-2">@refuel.MeasuredData.UnitCost &euro;</div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <div class="fw-bold">Litri benzina</div>
+                        <div class="px-2">@refuel.MeasuredData.Liters L</div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <div class="fw-bold">Autonomia</div>
+                        <Compare Source=@refuel.MeasuredData.Autonomy Comparison=@refuel.CalculatedData.Autonomy>
+                            <div>@refuel.MeasuredData.Autonomy Km</div>
+                        </Compare>
+                    </div>
+                </Card>
+            </div>
+        </div>
+        <div class="mb-3">
+            <div class="mb-1 fw-bold">Dati calcolati</div>
+            <div style="font-size: 14px">
+                <Card>
+                    <div class="d-flex justify-content-between">
+                        <div class="fw-bold">Costo rifornimento</div>
+                        <div class="px-2">@refuel.CalculatedData.TotalCost &euro;</div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <div class="fw-bold">Consumi</div>
+                        <div class="px-2">@refuel.CalculatedData.Consumptions Km / L</div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <div class="fw-bold">Autonomia</div>
+                        <div class="px-2">@refuel.CalculatedData.Autonomy Km</div>
+                    </div>
+                </Card>
+            </div>
+        </div>
+        <div>
+            <RedButton OnCallback=@OnDelete IsDisabled=@isLoading>Elimina</RedButton>
+        </div>
+    }
+</Loader>
+
+@code {
+    [Parameter]
+    public required string VehicleId { get; set; }
+    [Parameter]
+    public required string RefuelId { get; set; }
+
+    public ClaimsPrincipal? principal;
+
+    public Refuel? refuel;
+    public bool isLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        principal = await userManager.GetAuthenticatedUser();
+        if (principal is null)
+        {
+            navigationManager.NavigateTo("", true, false);
+            return;
+        }
+
+        refuel = await refuelService.GetById(RefuelId);
+        isLoading = false;
+    }
+
+    private void OnGoBack()
+    {
+        navigationManager.NavigateTo($"/garage/{VehicleId}/refuels", true, false);
+    }
+
+    private async Task OnDelete()
+    {
+        var isConfirmed = await dialogService.Alert("Eliminare?", RefuelId, "OK", "ANNULLA");
+
+        if (isConfirmed)
+        {
+            await refuelService.DeleteById(RefuelId);
+            navigationManager.NavigateTo($"/garage/{VehicleId}/refuels", true, false);
+        }
+    }
+}

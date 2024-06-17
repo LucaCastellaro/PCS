@@ -32,11 +32,11 @@ else
 {
     @foreach(var item in refuels)
     {
-        <div class="mb-3" role="button">
+        <div class="mb-3" style="font-size: 14px" role="button" @onclick="() => OnGoToDetail(item.Id)">
             <Card>
                 <div class="d-flex justify-content-between">
-                    <div>@item.Station</div>
-                    <div>@item.Date</div>
+                    <div class="fw-bold">@item.Station</div>
+                    <div>@item.Date.ToString("dd/MM/yyyy")</div>
                 </div>
             </Card>
         </div>
@@ -70,6 +70,12 @@ else
     private void OnNewRefuel()
     {
         navigationManager.NavigateTo($"/garage/{VehicleId}/refuels/new", false, false);
+        return;
+    }
+
+    private void OnGoToDetail(string refuelId)
+    {
+        navigationManager.NavigateTo($"/garage/{VehicleId}/refuels/{refuelId}", false, false);
         return;
     }
 }

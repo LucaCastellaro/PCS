@@ -1,0 +1,22 @@
+﻿<div class="px-2 rounded-pill" style=@style>
+    @ChildContent
+</div>
+
+@code {
+    [Parameter]
+    public required decimal Source { get; set; }
+    [Parameter]
+    public required decimal Comparison { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    public string? style = $"background-color: ";
+
+    protected override void OnInitialized()
+    {
+        style += Source > Comparison ? "#AED58199"
+            : Source == Comparison ? "#FCA31199"
+            : "#E5737399";
+    }
+}

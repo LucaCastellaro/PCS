@@ -5,6 +5,7 @@
 @using PCS.Common.Entities.Models.Entities
 @using PCS.Front.Shared.Services
 @using PCS.Front.Components.Custom
+@using PCS.Front.Components.Layout
 @using PCS.Auth.Extensions
 @using PCS.Front.Components.Layout
 @using System.Security.Claims
@@ -55,7 +56,7 @@
     {
         if (string.IsNullOrWhiteSpace(vehicleId))
         {
-            await dialogService.Alert("Nessun veicolo selezionato", "OK");
+            await dialogService.Alert("Attenzione", "Nessun veicolo selezionato", "OK");
             return;
         }
 
@@ -63,7 +64,7 @@
 
         if (response.HasErrors)
         {
-            await dialogService.Alert(response.Errors.First(), "OK");
+            await dialogService.Alert("Errore", response.Errors.First(), "OK");
             return;
         }
 
