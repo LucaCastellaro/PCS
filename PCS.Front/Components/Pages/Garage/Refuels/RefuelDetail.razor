@@ -1,7 +1,6 @@
 ﻿@page "/garage/{VehicleId}/refuels/{RefuelId}";
 
 @using PCS.Auth.Services
-@using PCS.Business.Garage.Services
 @using PCS.Business.Refuel.Services
 @using PCS.Common.Entities.Models.Entities
 @using PCS.Front.Shared.Services
@@ -11,7 +10,6 @@
 @using System.Security.Claims
 
 @inject IDialogService dialogService
-@inject IVehicleService vehicleService
 @inject IUserManager userManager
 @inject NavigationManager navigationManager
 @inject IRefuelService refuelService
@@ -89,6 +87,9 @@
         <div>
             <RedButton OnCallback=@OnDelete IsDisabled=@isLoading>Elimina</RedButton>
         </div>
+        <FAB IsDisabled=@isLoading OnCallback=@OnGoToEdit>
+            <i class="bi bi-pencil" />
+        </FAB>
     }
 </Loader>
 
@@ -120,6 +121,7 @@
     private void OnGoBack()
     {
         navigationManager.NavigateTo($"/garage/{VehicleId}/refuels", true, false);
+        return;
     }
 
     private async Task OnDelete()
@@ -130,6 +132,12 @@
         {
             await refuelService.DeleteById(RefuelId);
             navigationManager.NavigateTo($"/garage/{VehicleId}/refuels", true, false);
+            return;
         }
+    }
+
+    private void OnGoToEdit(){
+        navigationManager.NavigateTo($"/garage/{VehicleId}/refuels/{RefuelId}/edit");
+        return;
     }
 }

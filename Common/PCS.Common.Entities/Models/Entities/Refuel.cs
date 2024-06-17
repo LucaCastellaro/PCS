@@ -22,16 +22,16 @@ public sealed record QuickRefuel
 
 public sealed record MeasuredData
 {
-    public required string Station { get; init; }
-    public required DateTime Date { get; init; }
+    public required string Station { get; set; }
+    public required DateTime Date { get; set; }
 
-    [BsonRepresentation(BsonType.Decimal128)] public required decimal Km { get; init; }
+    [BsonRepresentation(BsonType.Decimal128)] public required decimal Km { get; set; }
 
-    [BsonRepresentation(BsonType.Decimal128)] public required decimal UnitCost { get; init; }
+    [BsonRepresentation(BsonType.Decimal128)] public required decimal UnitCost { get; set; }
 
-    [BsonRepresentation(BsonType.Decimal128)] public required decimal Liters { get; init; }
-    [BsonRepresentation(BsonType.Decimal128)] public required decimal Consumptions { get; init; }
-    [BsonRepresentation(BsonType.Decimal128)] public required decimal Autonomy { get; init; }
+    [BsonRepresentation(BsonType.Decimal128)] public required decimal Liters { get; set; }
+    [BsonRepresentation(BsonType.Decimal128)] public required decimal Consumptions { get; set; }
+    [BsonRepresentation(BsonType.Decimal128)] public required decimal Autonomy { get; set; }
 }
 
 public sealed record CalculatedData

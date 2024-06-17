@@ -26,6 +26,7 @@ public interface IRefuelService
     Task<decimal> SumWeightedConsumptions(string vehicleId);
     Task<Entities.Refuel?> GetById(string id);
     Task<bool> DeleteById(string id);
+    Task<ResponseDto<Entities.Refuel?>> Edit(EditRefuelDTO model);
 }
 
 public sealed class RefuelService(IRepository<Entities.Refuel> repo) : IRefuelService
@@ -68,7 +69,8 @@ public sealed class RefuelService(IRepository<Entities.Refuel> repo) : IRefuelSe
             Data = await repo.FindByIdAsync(objectId)
         };
 
-        if (result.Data is null) {
+        if (result.Data is null)
+        {
             result.Errors.Add($"Impossibile aggiungere il rifornimento al veicolo targato {model.Vehicle.Plate}");
         }
 
@@ -131,4 +133,51 @@ public sealed class RefuelService(IRepository<Entities.Refuel> repo) : IRefuelSe
     private decimal GetWeightedAutonomy(decimal liters, decimal autonomy) => liters * autonomy;
 
     private decimal GetWeightedConsumptions(decimal consumptions, decimal autonomy) => consumptions * autonomy;
+
+    public async Task<ResponseDto<Entities.Refuel?>> Edit(EditRefuelDTO model)
+    {
+        var onDb = await GetById(model.Id);
+        if (onDb is null)
+            return new()
+            {
+                Errors = ["Rifornimento non trovato."],
+            };
+        var calculatedAutonomy = model.Liters * model.Consumptions;
+        var calculatedconsumptions = model.Autonomy / model.Liters;
+
+        var toUpdate = onDb with
+        {
+            MeasuredData = onDb.MeasuredData with
+            {
+                Autonomy = model.Autonomy.Round(3),
+                Consumptions = model.Consumptions.Round(3),
+                Date = model.Date,
+                Km = model.Km.Round(3),
+                Liters = model.Liters.Round(3),
+                Station = model.Station,
+                UnitCost = model.UnitCost.Round(3),
+            },
+            CalculatedData = new()
+            {
+                Autonomy = calculatedAutonomy.Round(3),
+                Consumptions = calculatedconsumptions.Round(3),
+                TotalCost = (model.UnitCost * model.Liters).Round(3),
+                WeightedConsumptions = GetWeightedConsumptions(calculatedconsumptions, calculatedAutonomy).Round(3),
+                WeightedAutonomy = GetWeightedAutonomy(model.Liters, calculatedAutonomy).Round(3)
+            }
+        };
+
+        var result = await repo.UpdateAsync(toUpdate, toUpdate.Id);
+
+        if (result is null)
+            return new()
+            {
+                Errors = ["Errore durante l'aggiornamento del rifornimento."]
+            };
+
+        return new()
+        {
+            Data = result,
+        };
+    }
 }
