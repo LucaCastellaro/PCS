@@ -54,7 +54,7 @@ public sealed class VehicleService(IRepository<Vehicle> repo) : IVehicleService
     {
         model = model with { Plate = model.Plate.Sanitize() };
 
-        var onDb = await FindByPlate(model.Plate, model.UserId);
+        var onDb = await FindById(model.Id, model.UserId);
         if (onDb.Data is null) return await AddVehicle(model);
 
         return await EditVehicle(model, onDb.Data);
@@ -100,16 +100,6 @@ public sealed class VehicleService(IRepository<Vehicle> repo) : IVehicleService
 
     private async Task<ResponseDto<Vehicle>> EditVehicle(UpsertVehicleDto model, Vehicle onDb)
     {
-        if (onDb.Id != model.Id)
-        {
-            return new()
-            {
-                Errors = [
-                    $"Veicolo con targa {model.Plate} non trovato."
-                ],
-            };
-        }
-
         var updated = onDb with
         {
             UserId = model.UserId,
@@ -119,8 +109,6 @@ public sealed class VehicleService(IRepository<Vehicle> repo) : IVehicleService
             FuelType = model.FuelType,
             TotalKm = model.TotalKm,
             InsertDate = DateTime.Now,
-            Photo = string.Empty,
-            TotalFuel = 0
         };
 
         var result = await repo.UpdateAsync(updated, updated.Id);
@@ -141,7 +129,7 @@ public sealed class VehicleService(IRepository<Vehicle> repo) : IVehicleService
         };
     }
 
-    public async Task<ResponseDto<Vehicle>> FindById(string vehicleId, string userId)
+    public async Task<ResponseDto<Vehicle>> FindById(string? vehicleId, string userId)
     {
         var result = new ResponseDto<Vehicle>()
         {

@@ -1,14 +1,26 @@
 ﻿@page "/garage/{VehicleId}/overview";
 
+@using PCS.Front.Components.Custom
 @using PCS.Front.Components.Layout
+
+@inject NavigationManager navigationManager
 
 <div>
     <h3>VehicleOverview</h3>
 
     <p>id veicolo: @VehicleId</p>
+
+    <FAB OnCallback=@OnEditVehicle>
+        <i class="bi bi-pencil" />
+    </FAB>
 </div>
 
 @code {
     [Parameter]
     public required string VehicleId { get; set; }
+
+    public void OnEditVehicle()
+    {
+        navigationManager.NavigateTo($"/garage/{VehicleId}/edit", false, false);
+    }
 }

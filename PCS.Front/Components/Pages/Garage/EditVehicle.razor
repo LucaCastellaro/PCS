@@ -1,0 +1,153 @@
+﻿@page "/garage/{VehicleId}/edit"
+
+@using PCS.Auth.Services
+@using PCS.Common.Entities.Models.Entities
+@using PCS.Front.Components.Layout
+@using PCS.Common.Entities.Models.Dtos
+@using PCS.Business.Garage.Services
+@using PCS.Auth.Extensions
+@using System.Security.Claims
+@using PCS.Front.Shared.Services
+
+@inject IDialogService dialogService
+@inject IVehicleService vehicleService
+@inject IUserManager userManager
+@inject NavigationManager navigationManager
+
+<div class="mb-3">
+    <div class="mb-3">
+        <span class="fw-semibold">Modifica veicolo</span>
+    </div>
+    <Card>
+        <form>
+            <div class="mb-3">
+                <label for="name" class="form-label">Nome</label>
+                <input type="text" class="form-control text-uppercase" id="name" @bind=name />
+            </div>
+            <div class="mb-3">
+                <label for="plate" class="form-label">Targa</label>
+                <input type="text" class="form-control text-uppercase" id="plate" @bind=plate />
+            </div>
+            <div class="mb-3">
+                <label for="date" class="form-label">Data di acquisto</label>
+                <input type="date" class="form-control" id="date" @bind=buyDate />
+            </div>
+            <div class="mb-3">
+                <label for="totalKm" class="form-label">Km totali</label>
+                <input type="number" class="form-control" id="totalKm" @bind=totalKm />
+            </div>
+            <div class="mb-3">
+                <label for="fuel-type" class="form-label">Alimentazione</label>
+                <select class="form-select" id="fuel-type" @bind=fuelType>
+                    @foreach (var item in fuelTypes)
+                    {
+                        <option value=@item.Value>@item.Label</option>
+                    }
+                </select>
+            </div>
+            <div class="d-flex justify-content-evenly">
+                <button class="rounded-pill py-2 px-3 btn-cancel fw-bold" @onclick=OnCancel>Annulla</button>
+                <button class="rounded-pill py-2 px-3 btn-save fw-bold" @onclick=OnSave>Salva</button>
+            </div>
+        </form>
+    </Card>
+</div>
+
+@code {
+    [Parameter]
+    public required string VehicleId { get; set; }
+
+    ClaimsPrincipal? principal;
+
+    List<FuelTypeDto> fuelTypes = [];
+
+    string name = string.Empty;
+    string plate = string.Empty;
+    DateTime buyDate = DateTime.Now;
+    FuelType fuelType = FuelType.Gasoline;
+    decimal totalKm = 0;
+    Vehicle? vehicle = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        principal = await userManager.GetAuthenticatedUser();
+        if (principal is null)
+        {
+            navigationManager.NavigateTo("", true, false);
+            return;
+        }
+
+        fuelTypes = vehicleService.GetFuelTypes();
+
+        await FindVehicle();
+
+        await InitForm();
+    }
+
+    private async Task InitForm()
+    {
+        if (vehicle is null)
+        {
+            await dialogService.Alert("Attenzione", "Veicolo non trovato", "OK");
+            return;
+        }
+
+        name = vehicle.Name;
+        plate = vehicle.Plate;
+        buyDate = vehicle.BuyDate;
+        fuelType = vehicle.FuelType;
+        totalKm = vehicle.TotalKm;
+    }
+
+    private async Task FindVehicle()
+    {
+        if (principal is null)
+        {
+            navigationManager.NavigateTo("", true, false);
+            return;
+        }
+
+        var response = await vehicleService.FindById(VehicleId, principal.GetUserId()!);
+        if (response.HasErrors)
+        {
+            var error = response.Errors.First();
+            await dialogService.Alert("Attenzione", error, "OK");
+            return;
+        }
+
+        this.vehicle = response.Data;
+    }
+
+    private void OnCancel()
+    {
+        if (principal is null)
+        {
+            navigationManager.NavigateTo("", true, false);
+            return;
+        }
+
+        navigationManager.NavigateTo($"garage/{VehicleId}/overview", true, false);
+    }
+
+    private async Task OnSave()
+    {
+        if (principal is null)
+        {
+            navigationManager.NavigateTo("", true, false);
+            return;
+        }
+
+        await vehicleService.UpsertVehicle(new()
+            {
+                UserId = principal.GetUserId()!,
+                Name = name,
+                BuyDate = buyDate,
+                FuelType = fuelType,
+                Plate = plate,
+                TotalKm = totalKm,
+                Id = VehicleId
+            });
+
+        navigationManager.NavigateTo($"garage/{VehicleId}/overview", true, false);
+    }
+}
